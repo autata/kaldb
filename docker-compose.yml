@@ -2,15 +2,15 @@ version: "3"
 services:
   zookeeper:
     image: 'bitnami/zookeeper:3.6.3'
-    container_name: kaldb_zookeeper
+    container_name: dep_zookeeper
     ports:
       - '2181:2181'
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
 
   kafka:
-    image: 'bitnami/kafka:latest'
-    container_name: kaldb_kafka
+    image: 'bitnami/kafka:3.2.3'
+    container_name: dep_kafka
     ports:
       - '9092:9092'
       - '29092:29092'
@@ -29,7 +29,7 @@ services:
 
   grafana:
     image: 'grafana/grafana:8.0.3'
-    container_name: kaldb_grafana
+    container_name: dep_grafana
     ports:
       - '3000:3000'
     volumes:
@@ -46,7 +46,7 @@ services:
 
   s3:
     image: 'adobe/s3mock:2.1.29'
-    container_name: kaldb_s3
+    container_name: dep_s3
     ports:
       - 9090:9090
     environment:
@@ -54,7 +54,7 @@ services:
 
   openzipkin:
     image: 'openzipkin/zipkin-slim'
-    container_name: openzipkin
+    container_name: dep_openzipkin
     ports:
       - 9411:9411
 
