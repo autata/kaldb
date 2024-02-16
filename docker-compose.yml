@@ -58,24 +58,78 @@ services:
     ports:
       - 9411:9411
 
-  #to build this image run 'docker build -t slackhq/kaldb .'
-  kaldb:
-    image: 'slackhq/kaldb'
-    container_name: kaldb_kaldb
-    profiles:
-      - kaldb
+  #to build this image run 'docker build -t aubreyt/kaldb .'
+  kaldb_preprocessor:
+    image: 'aubreyt/kaldb'
+    container_name: kaldb_preprocessor
     ports:
-      - 8080:8080
-      - 8081:8081
-      - 8082:8082
-      - 8083:8083
-      - 8085:8085
       - 8086:8086
     environment:
       - KALDB_ZK_CONNECTION_STRING=zookeeper:2181
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - NODE_ROLES=PREPROCESSOR
     depends_on:
       - zookeeper
       - kafka
       - s3
       - openzipkin
+
+  kaldb_index:
+    image: 'aubreyt/kaldb'
+    container_name: kaldb_index
+    ports:
+      - 8080:8080
+    environment:
+      - KALDB_ZK_CONNECTION_STRING=zookeeper:2181
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - NODE_ROLES=INDEX
+    depends_on:
+      - kaldb_preprocessor
+
+  kaldb_manager:
+    image: 'aubreyt/kaldb'
+    container_name: kaldb_manager
+    ports:
+      - 8083:8083
+    environment:
+      - KALDB_ZK_CONNECTION_STRING=zookeeper:2181
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - NODE_ROLES=MANAGER
+    depends_on:
+      - kaldb_preprocessor
+
+  kaldb_query:
+    image: 'aubreyt/kaldb'
+    container_name: kaldb_query
+    ports:
+      - 8081:8081
+    environment:
+      - KALDB_ZK_CONNECTION_STRING=zookeeper:2181
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - NODE_ROLES=QUERY
+    depends_on:
+      - kaldb_preprocessor
+
+  kaldb_cache:
+    image: 'aubreyt/kaldb'
+    container_name: kaldb_cache
+    ports:
+      - 8082:8082
+    environment:
+      - KALDB_ZK_CONNECTION_STRING=zookeeper:2181
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - NODE_ROLES=CACHE
+    depends_on:
+      - kaldb_preprocessor
+
+  kaldb_recovery:
+    image: 'aubreyt/kaldb'
+    container_name: kaldb_recovery
+    ports:
+      - 8085:8085
+    environment:
+      - KALDB_ZK_CONNECTION_STRING=zookeeper:2181
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - NODE_ROLES=RECOVERY
+    depends_on:
+      - kaldb_preprocessor
